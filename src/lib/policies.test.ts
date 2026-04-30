@@ -7,6 +7,10 @@ import {
   getFundingData,
 } from "./policies";
 
+// readdirSync has complex overloads; this cast lets mock return a plain string[]
+const mockFiles = (files: string[]) =>
+  files as unknown as ReturnType<typeof fs.readdirSync>;
+
 function makeMdx(slug: string, introduced = "2025-01-01") {
   return `---
 title: "Test Policy"
@@ -42,7 +46,7 @@ describe("getAllPolicySlugs", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest
       .spyOn(fs, "readdirSync")
-      .mockReturnValue(["ai-act.mdx", "privacy-bill.mdx", "README.md"] as any);
+      .mockReturnValue(mockFiles(["ai-act.mdx", "privacy-bill.mdx", "README.md"]));
 
     expect(getAllPolicySlugs()).toEqual(["ai-act", "privacy-bill"]);
   });
@@ -51,7 +55,7 @@ describe("getAllPolicySlugs", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest
       .spyOn(fs, "readdirSync")
-      .mockReturnValue(["good-slug.mdx", "Bad Slug.mdx", "../evil.mdx"] as any);
+      .mockReturnValue(mockFiles(["good-slug.mdx", "Bad Slug.mdx", "../evil.mdx"]));
 
     expect(getAllPolicySlugs()).toEqual(["good-slug"]);
   });
@@ -105,7 +109,7 @@ describe("getPolicy", () => {
 describe("getAllPolicies", () => {
   it("handles invalid introduced dates without throwing", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
-    jest.spyOn(fs, "readdirSync").mockReturnValue(["policy-a.mdx"] as any);
+    jest.spyOn(fs, "readdirSync").mockReturnValue(mockFiles(["policy-a.mdx"]));
     jest.spyOn(fs, "readFileSync").mockReturnValue(
       makeMdx("policy-a").replace("2025-01-01", "not-a-date")
     );
@@ -116,7 +120,7 @@ describe("getAllPolicies", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest
       .spyOn(fs, "readdirSync")
-      .mockReturnValue(["policy-a.mdx", "policy-b.mdx"] as any);
+      .mockReturnValue(mockFiles(["policy-a.mdx", "policy-b.mdx"]));
     jest.spyOn(fs, "readFileSync").mockImplementation((p: unknown) => {
       if ((p as string).includes("policy-a.mdx")) {
         return makeMdx("policy-a", "2024-06-01");

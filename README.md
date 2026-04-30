@@ -1,5 +1,7 @@
 # TechPolicyDecoded
 
+[![CI](https://github.com/TechPolicyDecoded/decoder/actions/workflows/ci.yml/badge.svg)](https://github.com/TechPolicyDecoded/decoder/actions/workflows/ci.yml)
+
 U.S. tech policy in plain language — explained, sourced, and connected to the money behind it.
 
 **Site:** [techpolicydecoded.org](https://techpolicydecoded.org)
