@@ -81,8 +81,19 @@ Each `data/funding/<slug>.json` file follows this structure:
 ```bash
 npm run dev          # Start local dev server
 npm run build        # Production build
+npm test             # Run the test suite (Jest + React Testing Library)
+npm run test:watch   # Run tests in watch mode
 npm run fetch-data   # Manually trigger FEC data fetch scripts
 ```
+
+## Testing
+
+Tests live alongside source files as `*.test.ts` / `*.test.tsx`. The setup uses:
+- **Jest** (via `next/jest` transformer) for the test runner
+- **React Testing Library** for component tests
+- **`@testing-library/jest-dom`** for DOM matchers (`toBeInTheDocument`, `toHaveAttribute`, etc.)
+
+`fs` calls in lib utilities are tested via `jest.spyOn` — no real filesystem access in tests.
 
 ## Contributing
 

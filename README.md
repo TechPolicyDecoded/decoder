@@ -14,8 +14,10 @@ See [docs/project-brief.md](docs/project-brief.md) for full background and edito
 
 ```bash
 npm install
-npm run dev       # Start local dev server at http://localhost:3000
-npm run build     # Production build
+npm run dev         # Start local dev server at http://localhost:3000
+npm run build       # Production build
+npm test            # Run the test suite
+npm run test:watch  # Run tests in watch mode
 npm run fetch-data  # Manually trigger FEC/OpenSecrets data fetch
 ```
 
