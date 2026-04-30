@@ -13,7 +13,7 @@ The goal is to connect the dots between legislation and money in a way that is a
 - **Framework**: Next.js (App Router)
 - **Content**: MDX files for policy entries (Markdown + embedded React components)
 - **Data**: JSON files for structured funding/lobbying data, sourced from FEC API and OpenSecrets
-- **Styling**: TBD (likely Tailwind CSS)
+- **Styling**: Tailwind CSS
 - **Automation**: GitHub Actions for scheduled FEC data fetching
 - **Hosting**: TBD (likely Vercel or GitHub Pages)
 
@@ -30,9 +30,9 @@ decoder/
 ├── src/
 │   ├── app/               # Next.js App Router pages
 │   ├── components/        # Shared React components
-│   │   ├── FundingBreakdown.jsx
-│   │   ├── PolicyCard.jsx
-│   │   └── DonorMap.jsx
+│   │   ├── FundingBreakdown.tsx
+│   │   ├── PolicyCard.tsx
+│   │   └── DonorMap.tsx
 │   └── lib/               # Utilities, data helpers
 └── public/
 ```
@@ -97,4 +97,8 @@ Tests live alongside source files as `*.test.ts` / `*.test.tsx`. The setup uses:
 
 ## Contributing
 
-See CONTRIBUTING.md for editorial standards and how to add a new policy entry.
+Editorial standards and how to add a new policy entry are documented in this file:
+- **Content schema** — required MDX frontmatter fields
+- **Funding data schema** — structure of `data/funding/<slug>.json`
+- **Key conventions** — tone, sourcing, and accessibility expectations
+- **Commands** and **Testing** — local development and validation

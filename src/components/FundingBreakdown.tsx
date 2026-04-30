@@ -35,8 +35,8 @@ export default function FundingBreakdown({ data }: { data: FundingData }) {
               </tr>
             </thead>
             <tbody>
-              {data.top_donors_to_sponsors.map((donor, i) => (
-                <tr key={i} className="border-b border-gray-100">
+              {data.top_donors_to_sponsors.map((donor) => (
+                <tr key={`${donor.name}:${donor.source_url}`} className="border-b border-gray-100">
                   <td className="py-2">
                     <a
                       href={donor.source_url}
@@ -71,8 +71,8 @@ export default function FundingBreakdown({ data }: { data: FundingData }) {
               </tr>
             </thead>
             <tbody>
-              {data.lobbying_spend.map((entry, i) => (
-                <tr key={i} className="border-b border-gray-100">
+              {data.lobbying_spend.map((entry) => (
+                <tr key={`${entry.organization}:${entry.source_url}`} className="border-b border-gray-100">
                   <td className="py-2">
                     <a
                       href={entry.source_url}
@@ -97,7 +97,7 @@ export default function FundingBreakdown({ data }: { data: FundingData }) {
       <p className="text-xs text-gray-400">
         Last updated: {data.last_updated} &middot; Sources:{" "}
         {data.sources.map((src, i) => (
-          <span key={i}>
+          <span key={src}>
             <a
               href={src}
               target="_blank"

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import {
@@ -40,9 +41,9 @@ export default async function PolicyPage({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
-      <a href="/" className="text-sm text-blue-600 hover:underline">
+      <Link href="/" className="text-sm text-blue-600 hover:underline">
         &larr; All policies
-      </a>
+      </Link>
 
       <article className="mt-6">
         <header className="mb-8">

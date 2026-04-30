@@ -5,6 +5,17 @@ import matter from "gray-matter";
 const POLICIES_DIR = path.join(process.cwd(), "content/policies");
 const FUNDING_DIR = path.join(process.cwd(), "data/funding");
 
+const SAFE_SLUG = /^[a-z0-9-]+$/;
+
+function isSafeSlug(slug: string): boolean {
+  return SAFE_SLUG.test(slug);
+}
+
+function safeResolve(dir: string, filename: string): string | null {
+  const resolved = path.resolve(dir, filename);
+  return resolved.startsWith(dir + path.sep) ? resolved : null;
+}
+
 export type PolicyStatus = "proposed" | "committee" | "passed" | "failed";
 
 export interface PolicyFrontmatter {
@@ -53,8 +64,9 @@ export function getAllPolicySlugs(): string[] {
 }
 
 export function getPolicy(slug: string): Policy | null {
-  const filePath = path.join(POLICIES_DIR, `${slug}.mdx`);
-  if (!fs.existsSync(filePath)) return null;
+  if (!isSafeSlug(slug)) return null;
+  const filePath = safeResolve(POLICIES_DIR, `${slug}.mdx`);
+  if (!filePath || !fs.existsSync(filePath)) return null;
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content } = matter(raw);
@@ -77,7 +89,13 @@ export function getAllPolicies(): Policy[] {
 }
 
 export function getFundingData(slug: string): FundingData | null {
-  const filePath = path.join(FUNDING_DIR, `${slug}.json`);
-  if (!fs.existsSync(filePath)) return null;
-  return JSON.parse(fs.readFileSync(filePath, "utf-8")) as FundingData;
+  if (!isSafeSlug(slug)) return null;
+  const filePath = safeResolve(FUNDING_DIR, `${slug}.json`);
+  if (!filePath || !fs.existsSync(filePath)) return null;
+
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as FundingData;
+  } catch {
+    return null;
+  }
 }
