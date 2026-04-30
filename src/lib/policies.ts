@@ -7,6 +7,7 @@ const FUNDING_DIR = path.join(process.cwd(), "data/funding");
 
 const SAFE_SLUG = /^[a-z0-9-]+$/;
 const VALID_STATUSES = ["proposed", "committee", "passed", "failed"] as const;
+const VALID_POSITIONS = ["support", "oppose", "unknown"] as const;
 
 function isSafeSlug(slug: string): boolean {
   return SAFE_SLUG.test(slug);
@@ -63,10 +64,10 @@ function validateFrontmatter(
     data;
 
   if (typeof title !== "string" || !title) return null;
-  if (typeof slug !== "string" || !slug) return null;
+  if (typeof slug !== "string" || !isSafeSlug(slug)) return null;
   if (typeof introduced !== "string" || !introduced) return null;
   if (typeof summary !== "string" || !summary) return null;
-  if (typeof funding_data !== "string" || !funding_data) return null;
+  if (typeof funding_data !== "string" || !isSafeSlug(funding_data)) return null;
   if (!VALID_STATUSES.includes(status as PolicyStatus)) return null;
 
   return {
@@ -81,6 +82,48 @@ function validateFrontmatter(
       : [],
     tags: Array.isArray(tags)
       ? tags.filter((t): t is string => typeof t === "string")
+      : [],
+  };
+}
+
+function validateDonor(raw: unknown): Donor | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const d = raw as Record<string, unknown>;
+  if (typeof d.name !== "string" || !d.name) return null;
+  if (typeof d.amount !== "number") return null;
+  if (typeof d.source_url !== "string") return null;
+  return { name: d.name, amount: d.amount, source_url: d.source_url };
+}
+
+function validateLobbyingEntry(raw: unknown): LobbyingEntry | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const d = raw as Record<string, unknown>;
+  if (typeof d.organization !== "string" || !d.organization) return null;
+  if (typeof d.amount !== "number") return null;
+  if (!VALID_POSITIONS.includes(d.position as LobbyingEntry["position"])) return null;
+  if (typeof d.source_url !== "string") return null;
+  return {
+    organization: d.organization,
+    amount: d.amount,
+    position: d.position as LobbyingEntry["position"],
+    source_url: d.source_url,
+  };
+}
+
+function validateFundingData(raw: unknown): FundingData | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const d = raw as Record<string, unknown>;
+  return {
+    policy_slug: typeof d.policy_slug === "string" ? d.policy_slug : "",
+    last_updated: typeof d.last_updated === "string" ? d.last_updated : "",
+    top_donors_to_sponsors: Array.isArray(d.top_donors_to_sponsors)
+      ? d.top_donors_to_sponsors.map(validateDonor).filter((x): x is Donor => x !== null)
+      : [],
+    lobbying_spend: Array.isArray(d.lobbying_spend)
+      ? d.lobbying_spend.map(validateLobbyingEntry).filter((x): x is LobbyingEntry => x !== null)
+      : [],
+    sources: Array.isArray(d.sources)
+      ? d.sources.filter((s): s is string => typeof s === "string")
       : [],
   };
 }
@@ -103,7 +146,7 @@ export function getPolicy(slug: string): Policy | null {
   const { data, content } = matter(raw);
 
   const frontmatter = validateFrontmatter(data as Record<string, unknown>);
-  if (!frontmatter) return null;
+  if (!frontmatter || frontmatter.slug !== slug) return null;
 
   return { frontmatter, content };
 }
@@ -117,24 +160,6 @@ export function getAllPolicies(): Policy[] {
       const tb = new Date(b.frontmatter.introduced).getTime();
       return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta);
     });
-}
-
-function validateFundingData(raw: unknown): FundingData | null {
-  if (typeof raw !== "object" || raw === null) return null;
-  const d = raw as Record<string, unknown>;
-  return {
-    policy_slug: typeof d.policy_slug === "string" ? d.policy_slug : "",
-    last_updated: typeof d.last_updated === "string" ? d.last_updated : "",
-    top_donors_to_sponsors: Array.isArray(d.top_donors_to_sponsors)
-      ? (d.top_donors_to_sponsors as Donor[])
-      : [],
-    lobbying_spend: Array.isArray(d.lobbying_spend)
-      ? (d.lobbying_spend as LobbyingEntry[])
-      : [],
-    sources: Array.isArray(d.sources)
-      ? d.sources.filter((s): s is string => typeof s === "string")
-      : [],
-  };
 }
 
 export function getFundingData(slug: string): FundingData | null {
