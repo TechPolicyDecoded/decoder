@@ -26,7 +26,7 @@ decoder/
 ├── data/
 │   └── funding/           # JSON funding data keyed by policy slug
 ├── scripts/
-│   └── fetch-fec-data.js  # FEC/OpenSecrets API data fetching
+│   └── fetch-fec-data.mjs # FEC/OpenSecrets API data fetching
 ├── src/
 │   ├── app/               # Next.js App Router pages
 │   ├── components/        # Shared React components

@@ -90,7 +90,8 @@ export function getAllPolicySlugs(): string[] {
   return fs
     .readdirSync(POLICIES_DIR)
     .filter((f) => f.endsWith(".mdx"))
-    .map((f) => f.replace(/\.mdx$/, ""));
+    .map((f) => f.replace(/\.mdx$/, ""))
+    .filter(isSafeSlug);
 }
 
 export function getPolicy(slug: string): Policy | null {
@@ -118,13 +119,31 @@ export function getAllPolicies(): Policy[] {
     });
 }
 
+function validateFundingData(raw: unknown): FundingData | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const d = raw as Record<string, unknown>;
+  return {
+    policy_slug: typeof d.policy_slug === "string" ? d.policy_slug : "",
+    last_updated: typeof d.last_updated === "string" ? d.last_updated : "",
+    top_donors_to_sponsors: Array.isArray(d.top_donors_to_sponsors)
+      ? (d.top_donors_to_sponsors as Donor[])
+      : [],
+    lobbying_spend: Array.isArray(d.lobbying_spend)
+      ? (d.lobbying_spend as LobbyingEntry[])
+      : [],
+    sources: Array.isArray(d.sources)
+      ? d.sources.filter((s): s is string => typeof s === "string")
+      : [],
+  };
+}
+
 export function getFundingData(slug: string): FundingData | null {
   if (!isSafeSlug(slug)) return null;
   const filePath = safeResolve(FUNDING_DIR, `${slug}.json`);
   if (!filePath || !fs.existsSync(filePath)) return null;
 
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as FundingData;
+    return validateFundingData(JSON.parse(fs.readFileSync(filePath, "utf-8")));
   } catch {
     return null;
   }

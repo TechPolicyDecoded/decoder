@@ -106,6 +106,7 @@ export default function FundingBreakdown({ data }: { data: FundingData }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:underline"
+                  aria-label={`Source ${i + 1}: ${new URL(src).hostname}`}
                 >
                   [{i + 1}]
                 </a>{" "}
