@@ -3,11 +3,13 @@
 import Link from "next/link";
 
 export default function PolicyError({
+  error,
   reset,
 }: {
   error: Error;
   reset: () => void;
 }) {
+  console.error(error);
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="text-2xl font-bold text-gray-900">

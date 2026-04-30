@@ -95,19 +95,24 @@ export default function FundingBreakdown({ data }: { data: FundingData }) {
       )}
 
       <p className="text-xs text-gray-400">
-        Last updated: {data.last_updated} &middot; Sources:{" "}
-        {data.sources.map((src, i) => (
-          <span key={src}>
-            <a
-              href={src}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-            >
-              [{i + 1}]
-            </a>{" "}
-          </span>
-        ))}
+        Last updated: {data.last_updated}
+        {data.sources.length > 0 && (
+          <>
+            {" "}&middot; Sources:{" "}
+            {data.sources.map((src, i) => (
+              <span key={src}>
+                <a
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  [{i + 1}]
+                </a>{" "}
+              </span>
+            ))}
+          </>
+        )}
       </p>
     </div>
   );

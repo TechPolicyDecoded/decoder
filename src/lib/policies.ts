@@ -6,6 +6,7 @@ const POLICIES_DIR = path.join(process.cwd(), "content/policies");
 const FUNDING_DIR = path.join(process.cwd(), "data/funding");
 
 const SAFE_SLUG = /^[a-z0-9-]+$/;
+const VALID_STATUSES = ["proposed", "committee", "passed", "failed"] as const;
 
 function isSafeSlug(slug: string): boolean {
   return SAFE_SLUG.test(slug);
@@ -16,7 +17,7 @@ function safeResolve(dir: string, filename: string): string | null {
   return resolved.startsWith(dir + path.sep) ? resolved : null;
 }
 
-export type PolicyStatus = "proposed" | "committee" | "passed" | "failed";
+export type PolicyStatus = (typeof VALID_STATUSES)[number];
 
 export interface PolicyFrontmatter {
   title: string;
@@ -55,6 +56,35 @@ export interface FundingData {
   sources: string[];
 }
 
+function validateFrontmatter(
+  data: Record<string, unknown>
+): PolicyFrontmatter | null {
+  const { title, slug, status, introduced, sponsors, summary, tags, funding_data } =
+    data;
+
+  if (typeof title !== "string" || !title) return null;
+  if (typeof slug !== "string" || !slug) return null;
+  if (typeof introduced !== "string" || !introduced) return null;
+  if (typeof summary !== "string" || !summary) return null;
+  if (typeof funding_data !== "string" || !funding_data) return null;
+  if (!VALID_STATUSES.includes(status as PolicyStatus)) return null;
+
+  return {
+    title,
+    slug,
+    status: status as PolicyStatus,
+    introduced,
+    summary,
+    funding_data,
+    sponsors: Array.isArray(sponsors)
+      ? sponsors.filter((s): s is string => typeof s === "string")
+      : [],
+    tags: Array.isArray(tags)
+      ? tags.filter((t): t is string => typeof t === "string")
+      : [],
+  };
+}
+
 export function getAllPolicySlugs(): string[] {
   if (!fs.existsSync(POLICIES_DIR)) return [];
   return fs
@@ -71,21 +101,21 @@ export function getPolicy(slug: string): Policy | null {
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content } = matter(raw);
 
-  return {
-    frontmatter: data as PolicyFrontmatter,
-    content,
-  };
+  const frontmatter = validateFrontmatter(data as Record<string, unknown>);
+  if (!frontmatter) return null;
+
+  return { frontmatter, content };
 }
 
 export function getAllPolicies(): Policy[] {
   return getAllPolicySlugs()
     .map((slug) => getPolicy(slug))
     .filter((p): p is Policy => p !== null)
-    .sort(
-      (a, b) =>
-        new Date(b.frontmatter.introduced).getTime() -
-        new Date(a.frontmatter.introduced).getTime()
-    );
+    .sort((a, b) => {
+      const ta = new Date(a.frontmatter.introduced).getTime();
+      const tb = new Date(b.frontmatter.introduced).getTime();
+      return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta);
+    });
 }
 
 export function getFundingData(slug: string): FundingData | null {
