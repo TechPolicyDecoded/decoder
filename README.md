@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TechPolicyDecoded
 
-## Getting Started
+U.S. tech policy in plain language — explained, sourced, and connected to the money behind it.
 
-First, run the development server:
+**Site:** [techpolicydecoded.org](https://techpolicydecoded.org)
+
+## About
+
+TechPolicyDecoded is an open-source watchdog project that makes U.S. federal tech policy legible to everyone. For every major proposal, we explain what the bill actually says and show who is financially backing the politicians and lobbying efforts behind it — using public data from the FEC, OpenSecrets, and Congress.gov.
+
+See [docs/project-brief.md](docs/project-brief.md) for full background and editorial standards.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev       # Start local dev server at http://localhost:3000
+npm run build     # Production build
+npm run fetch-data  # Manually trigger FEC/OpenSecrets data fetch
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Contributing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Policy entries live in `content/policies/` as MDX files. Funding data lives in `data/funding/` as JSON. See [CLAUDE.md](CLAUDE.md) for the content schema and conventions.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## License
 
-## Learn More
+This project uses a dual license:
 
-To learn more about Next.js, take a look at the following resources:
+| What | License | File |
+|---|---|---|
+| Source code (`src/`, `scripts/`, config files) | [MIT](LICENSE-CODE) | `LICENSE-CODE` |
+| Content (`content/`, `data/`, `docs/`) | [CC BY 4.0](LICENSE-CONTENT) | `LICENSE-CONTENT` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+When reusing or adapting content, attribution to TechPolicyDecoded is required under CC BY 4.0.
