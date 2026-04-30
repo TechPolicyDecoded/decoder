@@ -99,21 +99,21 @@ function validateDonor(raw: unknown): Donor | null {
   if (typeof raw !== "object" || raw === null) return null;
   const d = raw as Record<string, unknown>;
   if (typeof d.name !== "string" || !d.name) return null;
-  if (typeof d.amount !== "number") return null;
+  if (!Number.isFinite(d.amount) || (d.amount as number) < 0) return null;
   if (typeof d.source_url !== "string" || !isSafeUrl(d.source_url)) return null;
-  return { name: d.name, amount: d.amount, source_url: d.source_url };
+  return { name: d.name, amount: d.amount as number, source_url: d.source_url };
 }
 
 function validateLobbyingEntry(raw: unknown): LobbyingEntry | null {
   if (typeof raw !== "object" || raw === null) return null;
   const d = raw as Record<string, unknown>;
   if (typeof d.organization !== "string" || !d.organization) return null;
-  if (typeof d.amount !== "number") return null;
+  if (!Number.isFinite(d.amount) || (d.amount as number) < 0) return null;
   if (!VALID_POSITIONS.includes(d.position as LobbyingEntry["position"])) return null;
   if (typeof d.source_url !== "string" || !isSafeUrl(d.source_url)) return null;
   return {
     organization: d.organization,
-    amount: d.amount,
+    amount: d.amount as number,
     position: d.position as LobbyingEntry["position"],
     source_url: d.source_url,
   };

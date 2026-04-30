@@ -32,6 +32,8 @@ This project uses a dual license:
 | What | License | File |
 |---|---|---|
 | Source code (`src/`, `scripts/`, config files) | [MIT](LICENSE-CODE) | `LICENSE-CODE` |
-| Content (`content/`, `data/`, `docs/`) | [CC BY 4.0](LICENSE-CONTENT) | `LICENSE-CONTENT` |
+| Original project content (`content/`, `docs/`, and original data in `data/`) | [CC BY 4.0](LICENSE-CONTENT) | `LICENSE-CONTENT` |
 
-When reusing or adapting content, attribution to TechPolicyDecoded is required under CC BY 4.0.
+**Note on third-party data:** Funding data in `data/funding/` is derived from sources such as the FEC (public domain) and OpenSecrets (non-commercial CC license). That data is not relicensed under CC BY 4.0 and remains subject to the terms of its original source. Check the `sources` field in each JSON file for attribution.
+
+When reusing or adapting original TechPolicyDecoded content, attribution is required under CC BY 4.0.
