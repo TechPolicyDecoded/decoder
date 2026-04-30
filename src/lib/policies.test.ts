@@ -184,6 +184,28 @@ describe("getFundingData", () => {
     expect(data!.lobbying_spend[0].organization).toBe("Good Org");
   });
 
+  it("filters out donor entries with non-http source_url", () => {
+    jest.spyOn(fs, "existsSync").mockReturnValue(true);
+    jest.spyOn(fs, "readFileSync").mockReturnValue(
+      JSON.stringify({
+        policy_slug: "test-policy",
+        last_updated: "2026-01-01",
+        top_donors_to_sponsors: [
+          { name: "Safe Donor", amount: 1000, source_url: "https://fec.gov" },
+          { name: "XSS Donor", amount: 500, source_url: "javascript:alert(1)" },
+          { name: "Data Donor", amount: 500, source_url: "data:text/html,<script>alert(1)</script>" },
+        ],
+        lobbying_spend: [],
+        sources: ["https://fec.gov", "javascript:alert(1)"],
+      })
+    );
+
+    const data = getFundingData("test-policy");
+    expect(data!.top_donors_to_sponsors).toHaveLength(1);
+    expect(data!.top_donors_to_sponsors[0].name).toBe("Safe Donor");
+    expect(data!.sources).toEqual(["https://fec.gov"]);
+  });
+
   it("returns null for malformed JSON", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest.spyOn(fs, "readFileSync").mockReturnValue("{ not valid json");

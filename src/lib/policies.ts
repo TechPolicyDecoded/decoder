@@ -13,6 +13,15 @@ function isSafeSlug(slug: string): boolean {
   return SAFE_SLUG.test(slug);
 }
 
+function isSafeUrl(url: string): boolean {
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function safeResolve(dir: string, filename: string): string | null {
   const resolved = path.resolve(dir, filename);
   return resolved.startsWith(dir + path.sep) ? resolved : null;
@@ -91,7 +100,7 @@ function validateDonor(raw: unknown): Donor | null {
   const d = raw as Record<string, unknown>;
   if (typeof d.name !== "string" || !d.name) return null;
   if (typeof d.amount !== "number") return null;
-  if (typeof d.source_url !== "string") return null;
+  if (typeof d.source_url !== "string" || !isSafeUrl(d.source_url)) return null;
   return { name: d.name, amount: d.amount, source_url: d.source_url };
 }
 
@@ -101,7 +110,7 @@ function validateLobbyingEntry(raw: unknown): LobbyingEntry | null {
   if (typeof d.organization !== "string" || !d.organization) return null;
   if (typeof d.amount !== "number") return null;
   if (!VALID_POSITIONS.includes(d.position as LobbyingEntry["position"])) return null;
-  if (typeof d.source_url !== "string") return null;
+  if (typeof d.source_url !== "string" || !isSafeUrl(d.source_url)) return null;
   return {
     organization: d.organization,
     amount: d.amount,
@@ -123,7 +132,7 @@ function validateFundingData(raw: unknown): FundingData | null {
       ? d.lobbying_spend.map(validateLobbyingEntry).filter((x): x is LobbyingEntry => x !== null)
       : [],
     sources: Array.isArray(d.sources)
-      ? d.sources.filter((s): s is string => typeof s === "string")
+      ? d.sources.filter((s): s is string => typeof s === "string" && isSafeUrl(s))
       : [],
   };
 }
