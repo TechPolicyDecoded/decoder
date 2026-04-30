@@ -1,0 +1,9 @@
+# Default owner for everything
+* @j-sm-n
+
+# Policy content and funding data require editorial review
+/content/ @j-sm-n
+/data/ @j-sm-n
+
+# CI and dependency config
+/.github/ @j-sm-n
