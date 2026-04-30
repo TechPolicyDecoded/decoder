@@ -90,9 +90,28 @@ describe("getPolicy", () => {
   it("returns null for unsafe slug input", () => {
     expect(getPolicy("../etc/passwd")).toBeNull();
   });
+
+  it("returns null if frontmatter funding_data contains an unsafe slug", () => {
+    jest.spyOn(fs, "existsSync").mockReturnValue(true);
+    const badFundingData = makeMdx("test-policy").replace(
+      'funding_data: "test-policy"',
+      'funding_data: "../evil"'
+    );
+    jest.spyOn(fs, "readFileSync").mockReturnValue(badFundingData);
+    expect(getPolicy("test-policy")).toBeNull();
+  });
 });
 
 describe("getAllPolicies", () => {
+  it("handles invalid introduced dates without throwing", () => {
+    jest.spyOn(fs, "existsSync").mockReturnValue(true);
+    jest.spyOn(fs, "readdirSync").mockReturnValue(["policy-a.mdx"] as any);
+    jest.spyOn(fs, "readFileSync").mockReturnValue(
+      makeMdx("policy-a").replace("2025-01-01", "not-a-date")
+    );
+    expect(() => getAllPolicies()).not.toThrow();
+  });
+
   it("returns policies sorted newest-introduced first", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(true);
     jest
@@ -163,6 +182,12 @@ describe("getFundingData", () => {
     const data = getFundingData("test-policy");
     expect(data!.lobbying_spend).toHaveLength(1);
     expect(data!.lobbying_spend[0].organization).toBe("Good Org");
+  });
+
+  it("returns null for malformed JSON", () => {
+    jest.spyOn(fs, "existsSync").mockReturnValue(true);
+    jest.spyOn(fs, "readFileSync").mockReturnValue("{ not valid json");
+    expect(getFundingData("test-policy")).toBeNull();
   });
 
   it("returns null if the funding file does not exist", () => {

@@ -67,4 +67,16 @@ describe("FundingBreakdown", () => {
     render(<FundingBreakdown data={withDonors} />);
     expect(screen.getByText(/Last updated: 2026-01-01/)).toBeInTheDocument();
   });
+
+  it("does not render Sources label when sources array is empty", () => {
+    render(<FundingBreakdown data={withLobbying} />);
+    expect(screen.queryByText(/Sources:/)).not.toBeInTheDocument();
+  });
+
+  it("renders source links with descriptive aria-labels", () => {
+    render(<FundingBreakdown data={withDonors} />);
+    expect(
+      screen.getByRole("link", { name: "Source 1: fec.gov" })
+    ).toHaveAttribute("href", "https://fec.gov");
+  });
 });
