@@ -1,31 +1,13 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { isSafeSlug, isSafeUrl, safeResolve } from "./utils";
 
 const POLICIES_DIR = path.join(process.cwd(), "content/policies");
 const FUNDING_DIR = path.join(process.cwd(), "data/funding");
 
-const SAFE_SLUG = /^[a-z0-9-]+$/;
 const VALID_STATUSES = ["proposed", "committee", "passed", "failed"] as const;
 const VALID_POSITIONS = ["support", "oppose", "unknown"] as const;
-
-function isSafeSlug(slug: string): boolean {
-  return SAFE_SLUG.test(slug);
-}
-
-function isSafeUrl(url: string): boolean {
-  try {
-    const { protocol } = new URL(url);
-    return protocol === "http:" || protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function safeResolve(dir: string, filename: string): string | null {
-  const resolved = path.resolve(dir, filename);
-  return resolved.startsWith(dir + path.sep) ? resolved : null;
-}
 
 export type PolicyStatus = (typeof VALID_STATUSES)[number];
 
@@ -38,6 +20,8 @@ export interface PolicyFrontmatter {
   summary: string;
   tags: string[];
   funding_data: string;
+  related_orgs: string[];
+  related_funders: string[];
 }
 
 export interface Policy {
@@ -69,14 +53,25 @@ export interface FundingData {
 function validateFrontmatter(
   data: Record<string, unknown>
 ): PolicyFrontmatter | null {
-  const { title, slug, status, introduced, sponsors, summary, tags, funding_data } =
-    data;
+  const {
+    title,
+    slug,
+    status,
+    introduced,
+    sponsors,
+    summary,
+    tags,
+    funding_data,
+    related_orgs,
+    related_funders,
+  } = data;
 
   if (typeof title !== "string" || !title) return null;
   if (typeof slug !== "string" || !isSafeSlug(slug)) return null;
   if (typeof introduced !== "string" || !introduced) return null;
   if (typeof summary !== "string" || !summary) return null;
-  if (typeof funding_data !== "string" || !isSafeSlug(funding_data)) return null;
+  if (typeof funding_data !== "string" || !isSafeSlug(funding_data))
+    return null;
   if (!VALID_STATUSES.includes(status as PolicyStatus)) return null;
 
   return {
@@ -91,6 +86,16 @@ function validateFrontmatter(
       : [],
     tags: Array.isArray(tags)
       ? tags.filter((t): t is string => typeof t === "string")
+      : [],
+    related_orgs: Array.isArray(related_orgs)
+      ? related_orgs.filter(
+          (s): s is string => typeof s === "string" && isSafeSlug(s)
+        )
+      : [],
+    related_funders: Array.isArray(related_funders)
+      ? related_funders.filter(
+          (s): s is string => typeof s === "string" && isSafeSlug(s)
+        )
       : [],
   };
 }
@@ -109,7 +114,8 @@ function validateLobbyingEntry(raw: unknown): LobbyingEntry | null {
   const d = raw as Record<string, unknown>;
   if (typeof d.organization !== "string" || !d.organization) return null;
   if (!Number.isFinite(d.amount) || (d.amount as number) < 0) return null;
-  if (!VALID_POSITIONS.includes(d.position as LobbyingEntry["position"])) return null;
+  if (!VALID_POSITIONS.includes(d.position as LobbyingEntry["position"]))
+    return null;
   if (typeof d.source_url !== "string" || !isSafeUrl(d.source_url)) return null;
   return {
     organization: d.organization,
@@ -126,13 +132,19 @@ function validateFundingData(raw: unknown): FundingData | null {
     policy_slug: typeof d.policy_slug === "string" ? d.policy_slug : "",
     last_updated: typeof d.last_updated === "string" ? d.last_updated : "",
     top_donors_to_sponsors: Array.isArray(d.top_donors_to_sponsors)
-      ? d.top_donors_to_sponsors.map(validateDonor).filter((x): x is Donor => x !== null)
+      ? d.top_donors_to_sponsors
+          .map(validateDonor)
+          .filter((x): x is Donor => x !== null)
       : [],
     lobbying_spend: Array.isArray(d.lobbying_spend)
-      ? d.lobbying_spend.map(validateLobbyingEntry).filter((x): x is LobbyingEntry => x !== null)
+      ? d.lobbying_spend
+          .map(validateLobbyingEntry)
+          .filter((x): x is LobbyingEntry => x !== null)
       : [],
     sources: Array.isArray(d.sources)
-      ? d.sources.filter((s): s is string => typeof s === "string" && isSafeUrl(s))
+      ? d.sources.filter(
+          (s): s is string => typeof s === "string" && isSafeUrl(s)
+        )
       : [],
   };
 }
@@ -177,7 +189,9 @@ export function getFundingData(slug: string): FundingData | null {
   if (!filePath || !fs.existsSync(filePath)) return null;
 
   try {
-    return validateFundingData(JSON.parse(fs.readFileSync(filePath, "utf-8")));
+    return validateFundingData(
+      JSON.parse(fs.readFileSync(filePath, "utf-8"))
+    );
   } catch {
     return null;
   }
