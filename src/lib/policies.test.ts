@@ -5,6 +5,7 @@ import {
   getPolicy,
   getAllPolicies,
   getFundingData,
+  getRelatedPolicies,
 } from "./policies";
 
 // readdirSync has complex overloads; this cast lets mock return a plain string[]
@@ -222,5 +223,39 @@ describe("getFundingData", () => {
   it("returns null if the funding file does not exist", () => {
     jest.spyOn(fs, "existsSync").mockReturnValue(false);
     expect(getFundingData("missing")).toBeNull();
+  });
+});
+
+describe("getRelatedPolicies", () => {
+  it("returns slug and title for each valid slug", () => {
+    jest.spyOn(fs, "existsSync").mockReturnValue(true);
+    jest.spyOn(fs, "readFileSync").mockImplementation((p: unknown) => {
+      if ((p as string).includes("ai-act"))
+        return makeMdx("ai-act").replace('title: "Test Policy"', 'title: "AI Act"');
+      return makeMdx("privacy-bill").replace('title: "Test Policy"', 'title: "Privacy Bill"');
+    });
+
+    const result = getRelatedPolicies(["ai-act", "privacy-bill"]);
+    expect(result).toEqual([
+      { slug: "ai-act", title: "AI Act" },
+      { slug: "privacy-bill", title: "Privacy Bill" },
+    ]);
+  });
+
+  it("silently drops slugs that do not resolve to a real policy", () => {
+    jest.spyOn(fs, "existsSync").mockImplementation((p: unknown) =>
+      (p as string).includes("real-policy")
+    );
+    jest.spyOn(fs, "readFileSync").mockReturnValue(
+      makeMdx("real-policy").replace('title: "Test Policy"', 'title: "Real Policy"')
+    );
+
+    const result = getRelatedPolicies(["real-policy", "ghost-policy"]);
+    expect(result).toEqual([{ slug: "real-policy", title: "Real Policy" }]);
+  });
+
+  it("returns empty array for empty input", () => {
+    const result = getRelatedPolicies([]);
+    expect(result).toEqual([]);
   });
 });

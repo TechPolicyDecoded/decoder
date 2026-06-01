@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { getAllFunderSlugs, getFunder } from "@/lib/funders";
+import { getAllFunderSlugs, getFunder, getRelatedFunders } from "@/lib/funders";
+import { getRelatedOrgs } from "@/lib/organizations";
+import { getRelatedPolicies } from "@/lib/policies";
 import type { Metadata } from "next";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -45,6 +47,8 @@ export default async function FunderPage({
   if (!funder) notFound();
 
   const { frontmatter, content } = funder;
+  const relatedOrgs = getRelatedOrgs(frontmatter.related_orgs);
+  const relatedPolicies = getRelatedPolicies(frontmatter.related_policies);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -68,34 +72,34 @@ export default async function FunderPage({
             )}
           </dl>
 
-          {frontmatter.related_orgs.length > 0 && (
+          {relatedOrgs.length > 0 && (
             <div className="mt-4">
               <p className="text-sm font-medium text-gray-700 mb-1">Organizations backed</p>
               <div className="flex flex-wrap gap-2">
-                {frontmatter.related_orgs.map((orgSlug) => (
+                {relatedOrgs.map((o) => (
                   <Link
-                    key={orgSlug}
-                    href={`/organizations/${orgSlug}`}
+                    key={o.slug}
+                    href={`/organizations/${o.slug}`}
                     className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-200"
                   >
-                    {orgSlug}
+                    {o.title}
                   </Link>
                 ))}
               </div>
             </div>
           )}
 
-          {frontmatter.related_policies.length > 0 && (
+          {relatedPolicies.length > 0 && (
             <div className="mt-3">
               <p className="text-sm font-medium text-gray-700 mb-1">Related policies</p>
               <div className="flex flex-wrap gap-2">
-                {frontmatter.related_policies.map((policySlug) => (
+                {relatedPolicies.map((p) => (
                   <Link
-                    key={policySlug}
-                    href={`/policies/${policySlug}`}
+                    key={p.slug}
+                    href={`/policies/${p.slug}`}
                     className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-100"
                   >
-                    {policySlug}
+                    {p.title}
                   </Link>
                 ))}
               </div>

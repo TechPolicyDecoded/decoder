@@ -5,7 +5,10 @@ import {
   getAllPolicySlugs,
   getPolicy,
   getFundingData,
+  getRelatedPolicies,
 } from "@/lib/policies";
+import { getRelatedOrgs } from "@/lib/organizations";
+import { getRelatedFunders } from "@/lib/funders";
 import FundingBreakdown from "@/components/FundingBreakdown";
 import DonorMap from "@/components/DonorMap";
 import type { Metadata } from "next";
@@ -38,6 +41,8 @@ export default async function PolicyPage({
   if (!policy) notFound();
 
   const funding = getFundingData(policy.frontmatter.funding_data);
+  const relatedOrgs = getRelatedOrgs(policy.frontmatter.related_orgs);
+  const relatedFunders = getRelatedFunders(policy.frontmatter.related_funders);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -84,6 +89,46 @@ export default async function PolicyPage({
         <div className="prose prose-gray max-w-none">
           <MDXRemote source={policy.content} />
         </div>
+
+        {(relatedOrgs.length > 0 || relatedFunders.length > 0) && (
+          <section className="mt-10 border-t border-gray-200 pt-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Who&apos;s behind this
+            </h2>
+            {relatedOrgs.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">Organizations</p>
+                <div className="flex flex-wrap gap-2">
+                  {relatedOrgs.map((o) => (
+                    <Link
+                      key={o.slug}
+                      href={`/organizations/${o.slug}`}
+                      className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-200"
+                    >
+                      {o.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {relatedFunders.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Key funders</p>
+                <div className="flex flex-wrap gap-2">
+                  {relatedFunders.map((f) => (
+                    <Link
+                      key={f.slug}
+                      href={`/funders/${f.slug}`}
+                      className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-200"
+                    >
+                      {f.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="mt-12 border-t border-gray-200 pt-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6">

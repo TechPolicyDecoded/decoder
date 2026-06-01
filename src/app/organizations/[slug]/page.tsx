@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { getAllOrgSlugs, getOrg } from "@/lib/organizations";
+import { getAllOrgSlugs, getOrg, getRelatedOrgs } from "@/lib/organizations";
+import { getRelatedFunders } from "@/lib/funders";
+import { getRelatedPolicies } from "@/lib/policies";
 import type { Metadata } from "next";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -39,6 +41,11 @@ export default async function OrgPage({
   if (!org) notFound();
 
   const { frontmatter, content } = org;
+  const relatedFunders = getRelatedFunders(frontmatter.related_funders);
+  const relatedPolicies = getRelatedPolicies(frontmatter.related_policies);
+  const relatedOrgs = frontmatter.parent_org
+    ? getRelatedOrgs([frontmatter.parent_org])
+    : [];
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -72,34 +79,51 @@ export default async function OrgPage({
             </div>
           </dl>
 
-          {frontmatter.related_funders.length > 0 && (
+          {relatedOrgs.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm font-medium text-gray-700 mb-1">Known funders</p>
+              <p className="text-sm font-medium text-gray-700 mb-1">Parent organization</p>
               <div className="flex flex-wrap gap-2">
-                {frontmatter.related_funders.map((slug) => (
+                {relatedOrgs.map((o) => (
                   <Link
-                    key={slug}
-                    href={`/funders/${slug}`}
+                    key={o.slug}
+                    href={`/organizations/${o.slug}`}
                     className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-200"
                   >
-                    {slug}
+                    {o.title}
                   </Link>
                 ))}
               </div>
             </div>
           )}
 
-          {frontmatter.related_policies.length > 0 && (
+          {relatedFunders.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-medium text-gray-700 mb-1">Known funders</p>
+              <div className="flex flex-wrap gap-2">
+                {relatedFunders.map((f) => (
+                  <Link
+                    key={f.slug}
+                    href={`/funders/${f.slug}`}
+                    className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-gray-200"
+                  >
+                    {f.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {relatedPolicies.length > 0 && (
             <div className="mt-3">
               <p className="text-sm font-medium text-gray-700 mb-1">Related policies</p>
               <div className="flex flex-wrap gap-2">
-                {frontmatter.related_policies.map((slug) => (
+                {relatedPolicies.map((p) => (
                   <Link
-                    key={slug}
-                    href={`/policies/${slug}`}
+                    key={p.slug}
+                    href={`/policies/${p.slug}`}
                     className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-100"
                   >
-                    {slug}
+                    {p.title}
                   </Link>
                 ))}
               </div>

@@ -116,3 +116,10 @@ export function getAllOrgs(): Organization[] {
     .filter((o): o is Organization => o !== null)
     .sort((a, b) => a.frontmatter.title.localeCompare(b.frontmatter.title));
 }
+
+export function getRelatedOrgs(slugs: string[]): { slug: string; title: string }[] {
+  return slugs
+    .map((slug) => getOrg(slug))
+    .filter((o): o is Organization => o !== null)
+    .map((o) => ({ slug: o.frontmatter.slug, title: o.frontmatter.title }));
+}

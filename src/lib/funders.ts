@@ -124,3 +124,10 @@ export function getAllFunders(): Funder[] {
     .filter((f): f is Funder => f !== null)
     .sort((a, b) => a.frontmatter.title.localeCompare(b.frontmatter.title));
 }
+
+export function getRelatedFunders(slugs: string[]): { slug: string; title: string }[] {
+  return slugs
+    .map((slug) => getFunder(slug))
+    .filter((f): f is Funder => f !== null)
+    .map((f) => ({ slug: f.frontmatter.slug, title: f.frontmatter.title }));
+}
