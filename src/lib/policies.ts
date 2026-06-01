@@ -183,6 +183,13 @@ export function getAllPolicies(): Policy[] {
     });
 }
 
+export function getRelatedPolicies(slugs: string[]): { slug: string; title: string }[] {
+  return slugs
+    .map((slug) => getPolicy(slug))
+    .filter((p): p is Policy => p !== null)
+    .map((p) => ({ slug: p.frontmatter.slug, title: p.frontmatter.title }));
+}
+
 export function getFundingData(slug: string): FundingData | null {
   if (!isSafeSlug(slug)) return null;
   const filePath = safeResolve(FUNDING_DIR, `${slug}.json`);

@@ -12,6 +12,8 @@ const base: PolicyFrontmatter = {
   summary: "Requires independent audits for high-risk AI systems.",
   tags: ["AI", "regulation"],
   funding_data: "ai-accountability-act",
+  related_orgs: [],
+  related_funders: [],
 };
 
 describe("PolicyCard", () => {
