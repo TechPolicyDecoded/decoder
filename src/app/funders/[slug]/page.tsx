@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { getAllFunderSlugs, getFunder, getRelatedFunders } from "@/lib/funders";
+import { getAllFunderSlugs, getFunder } from "@/lib/funders";
 import { getRelatedOrgs } from "@/lib/organizations";
 import { getRelatedPolicies } from "@/lib/policies";
 import type { Metadata } from "next";
