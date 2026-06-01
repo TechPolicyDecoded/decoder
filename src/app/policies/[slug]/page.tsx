@@ -5,7 +5,6 @@ import {
   getAllPolicySlugs,
   getPolicy,
   getFundingData,
-  getRelatedPolicies,
 } from "@/lib/policies";
 import { getRelatedOrgs } from "@/lib/organizations";
 import { getRelatedFunders } from "@/lib/funders";
